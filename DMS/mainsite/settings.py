@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'accounts',
+    'children',
+    'finance',
 ]
 
 AUTH_USER_MODEL = 'accounts.User'
@@ -132,5 +134,8 @@ STATICFILES_DIRS = [
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_URL = '/accounts/login/'
-LOGIN_REDIRECT_URL = '/accounts/redirect-dashboard/'
+# LOGIN_REDIRECT_URL = '/accounts/redirect-dashboard/'
 LOGOUT_REDIRECT_URL = '/accounts/login/'
+# Media files configuration (for photo uploads)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'

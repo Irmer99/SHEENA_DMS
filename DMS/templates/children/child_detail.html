@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ child.full_name }} - Details</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+  <nav class="navbar navbar-dark bg-primary">
+    <div class="container-fluid">
+      <a href="{% url 'accounts:admin-dashboard' %}" class="navbar-brand">Daycare System</a>
+      <div>
+        <span class="text-white me-3">{{ user.get_full_name|default:user.username }}</span>
+        <a href="{% url 'accounts:logout' %}" class="btn btn-light btn-sm">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container mt-4">
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+      {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <h1>{{ child.full_name }}</h1>
+
+    <div class="row mt-4">
+      <div class="col-md-8">
+        <!-- Basic Information -->
+        <div class="card mb-3">
+          <div class="card-header">
+            <h5>Basic Information</h5>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-3">
+                {% if child.photo %}
+                <img src="{{ child.photo.url }}" class="img-fluid rounded">
+                {% else %}
+                <div class="bg-light rounded d-flex align-items-center justify-content-center" style="height: 150px;">
+                  <span class="text-muted">No Photo</span>
+                </div>
+                {% endif %}
+              </div>
+              <div class="col-md-9">
+                <p><strong>Registration Number:</strong> {{ child.registration_number }}</p>
+                <p><strong>Date of Birth:</strong> {{ child.date_of_birth }}</p>
+                <p><strong>Age:</strong> {{ child.age }} years</p>
+                <p><strong>Gender:</strong> {{ child.get_gender_display }}</p>
+                <p><strong>Status:</strong>
+                  {% if child.is_active %}
+                  <span class="badge bg-success">Active</span>
+                  {% else %}
+                  <span class="badge bg-secondary">Inactive</span>
+                  {% endif %}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Parents/Guardians -->
+        <div class="card mb-3">
+          <div class="card-header">
+            <h5>Parents/Guardians</h5>
+          </div>
+          <div class="card-body">
+            {% for parent in parents %}
+            <div class="mb-3">
+              <h6>{{ parent.full_name }}</h6>
+              <p class="mb-1"><strong>Phone:</strong> {{ parent.phone }}</p>
+              <p class="mb-1"><strong>Email:</strong> {{ parent.user.email }}</p>
+              <p class="mb-0"><strong>Address:</strong> {{ parent.address }}</p>
+              <hr>
+              <p class="mb-1"><strong>Emergency Contact:</strong> {{ parent.emergency_contact_name }}</p>
+              <p class="mb-0"><strong>Emergency Phone:</strong> {{ parent.emergency_contact_phone }}</p>
+            </div>
+            {% empty %}
+            <p class="text-muted">No parents registered</p>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Medical Information (Staff/Admin only) -->
+        {% if user.role == 'admin' or user.role == 'staff' %}
+        <div class="card mb-3">
+          <div class="card-header bg-warning">
+            <h5>Medical Information (Staff Only)</h5>
+          </div>
+          <div class="card-body">
+            {% if child.medical_info %}
+            <p>{{ child.medical_info|linebreaks }}</p>
+            {% else %}
+            <p class="text-muted">No medical information recorded</p>
+            {% endif %}
+          </div>
+        </div>
+        {% endif %}
+      </div>
+
+      <div class="col-md-4">
+        <!-- Enrollments -->
+        <div class="card mb-3">
+          <div class="card-header">
+            <h5>Enrollments</h5>
+          </div>
+          <div class="card-body">
+            {% for enrollment in enrollments %}
+            <div class="mb-2">
+              <strong>{{ enrollment.get_class_room_display }}</strong>
+              <span class="badge bg-{{ enrollment.status|yesno:'success,secondary' }}">
+                {{ enrollment.get_status_display }}
+              </span>
+              <br>
+              <small>Since: {{ enrollment.enrollment_date }}</small>
+            </div>
+            <hr>
+            {% empty %}
+            <p class="text-muted">No enrollment records</p>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        {% if user.role == 'admin' or user.role == 'staff' %}
+        <div class="card">
+          <div class="card-header">
+            <h5>Quick Actions</h5>
+          </div>
+          <div class="card-body">
+            <div class="d-grid gap-2">
+              <a href="/admin/children/child/{{ child.pk }}/change/" class="btn btn-warning btn-sm">
+                Edit Child
+              </a>
+              <a href="/admin/children/enrollment/add/?child={{ child.pk }}" class="btn btn-info btn-sm">
+                Add Enrollment
+              </a>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="mt-3">
+      {% if user.role == 'parent' %}
+      <a href="{% url 'children:my-children' %}" class="btn btn-secondary">Back to My Children</a>
+      {% else %}
+      <a href="{% url 'children:child-list' %}" class="btn btn-secondary">Back to Children List</a>
+      {% endif %}
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
